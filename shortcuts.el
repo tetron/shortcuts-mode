@@ -33,7 +33,11 @@
   (let* ((md (buffer-local-value 'major-mode (elt b num)))
 	 (width (/ shortcuts-width cols))
 	 (avail (- width 6))
-	 (mdstr (concat "(" (shrink-string 10 (substring (format "%s" md) 0 -5)) ")"))
+	 (modewidth (- (/ avail 3) 2))
+	 (modename (substring (format "%s" md) 0 -5))
+	 (mdstr (if (> (+ (length (buffer-name (elt b num))) (length modename)) avail)
+		    (concat "(" (shrink-string modewidth modename) ")")
+		  (format "(%s)" modename)))
 	 (bufstr (shrink-string (- avail (length mdstr)) (buffer-name (elt b num))))
 	 (txt (format "C-%d %s%s%s "
 		      (% num 10)
@@ -58,7 +62,7 @@
 	       (b (filtered-buffer-list))
 	       (num 0)
 	       (shortcuts-width (window-body-width win))
-	       (cols 4))
+	       (cols (min (/ shortcuts-width 25) 5)))
 	  (with-current-buffer shortcuts-buf
 	    (make-local-variable 'buffer-read-only)
 	    (setq buffer-read-only nil)
@@ -108,24 +112,6 @@
   (interactive)
   (switch-to-shortcut 10))
 
-; maybe should use display-buffer-in-side-window
-
-;; (defun shortcuts-mode ()
-;;   (interactive)
-;;   (let ((n (get-buffer-window "*shortcuts*")))
-;;     (unless n
-;;       (setq n (split-window nil (- (window-total-height) 3) 'above)))
-;;     (set-window-buffer n "*shortcuts*")
-;;     (set-window-dedicated-p n t)
-;;     (set-window-parameter n 'no-other-window t)
-;;     (set-window-parameter n 'no-delete-other-windows t)
-;;     (with-selected-window n
-;;       (make-local-variable 'window-size-fixed)
-;;       (make-local-variable 'mode-line-format)
-;;       (setq window-size-fixed t)
-;;       (setq mode-line-format (list ""))
-;;     )))
-
 (defun shortcuts-mode ()
   (interactive)
   (let ((n (display-buffer-in-side-window (get-buffer-create "*shortcuts*") (list '(side . top)))))
@@ -134,7 +120,6 @@
     (with-selected-window n
        (make-local-variable 'window-size-fixed)
        (make-local-variable 'mode-line-format)
-;       (setq window-size-fixed t)
        (setq mode-line-format (list ""))))
   (add-hook 'buffer-list-update-hook 'update-shortcuts)
   (add-hook 'window-configuration-change-hook 'update-shortcuts)
