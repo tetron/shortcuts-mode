@@ -1,3 +1,39 @@
+;; shortcuts-mode.el --- minor mode providing a buffer shortcut bar    -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2024  Peter Amstutz
+
+;; Author: Peter Amstutz <tetron@interreality.org>
+;; Keywords: lisp
+;; Version: 1.0.0
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; This is a minor mode which adds a sticky window to the top of the
+;; frame listing the last ten buffers that were accessed.  You can
+;; then instantly switch the current window to one of the recent
+;; buffers using C-1 through C-0.
+;;
+;; As a special case, certain utility buffers (*Buffer List*,
+;; *Ibuffer*, the *shortcuts* buffer itself) are excluded from the top
+;; bar.  Dired buffers are also filtered, because otherwise navigating
+;; the filesystem through dired (which creates a new buffer for each
+;; directory) tends to fill up all the top slots.
+
+;;; Code:
+
 (defun shrink-string (p n)
   (let ((p2 (* 2 (/ p 2))))
     (if (> (length n) (1+ p2))
@@ -9,6 +45,7 @@
 		(or (string-prefix-p " " (buffer-name e))
 		    (string= (buffer-name e) "*shortcuts*")
 		    (string= (buffer-name e) "*Ibuffer*")
+		    (string= (buffer-name e) "*Buffer List*")
 		    (string= (buffer-local-value 'major-mode e) "dired-mode")))
 	      (buffer-list))))
 
@@ -134,4 +171,4 @@
   (global-set-key [?\C-9] 'do-shortcut-9)
   (global-set-key [?\C-0] 'do-shortcut-0))
 
-(provide 'shortcuts)
+(provide 'shortcuts-mode)
