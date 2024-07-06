@@ -50,7 +50,7 @@ Removes the middle of the string if necessary and replaces with ellipses."
       n)))
 
 (defun shortcuts-filtered-buffer-list ()
-  "Remove utility and Dired buffers from the list of buffers to be displayed in the shortcuts bar."
+  "Remove utility and Dired buffers from the list of buffers to be displayed."
   (cons nil (seq-remove (lambda (e)
 		(or (string-prefix-p " " (buffer-name e))
 		    (string= (buffer-name e) "*shortcuts*")
@@ -195,6 +195,7 @@ then instantly switch the current window to one of the recent
 	    ([?\C-8] . shortcuts-switch-to-8)
 	    ([?\C-9] . shortcuts-switch-to-9)
 	    ([?\C-0] . shortcuts-switch-to-0))
+  :group 'convenience
 
   (if shortcuts-mode
       (let ((n (display-buffer-in-side-window (get-buffer-create "*shortcuts*") (list '(side . top)))))
