@@ -53,7 +53,7 @@
 
 ;;;###autoload
 (defun shortcuts-sticky-window-delete-other-windows ()
-  "Delete all other windows that are not marked to be visible with `window-dedicated-p`."
+  "Delete all other windows unless marked with `window-dedicated-p`."
   (interactive)
   (mapcar (lambda (window)
 			(if (not (window-dedicated-p window))
