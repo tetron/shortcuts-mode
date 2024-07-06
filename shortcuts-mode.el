@@ -1,10 +1,12 @@
-;; shortcuts-mode.el --- minor mode providing a buffer shortcut bar    -*- lexical-binding: t; -*-
+;;; shortcuts-mode.el --- minor mode providing a buffer shortcut bar    -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024  Peter Amstutz
 
 ;; Author: Peter Amstutz <tetron@interreality.org>
 ;; Keywords: lisp
 ;; Version: 1.0.0
+;; Package-Requires: ((emacs "25.1"))
+;; URL: https://github.com/tetron/shortcuts-mode
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -34,13 +36,15 @@
 
 ;;; Code:
 
-(defun shrink-string (p n)
+
+
+(defun shortcuts-shrink-string (p n)
   (let ((p2 (* 2 (/ p 2))))
     (if (> (length n) (1+ p2))
 	(concat (substring n 0 (/ p 2)) "…" (substring n (/ p -2) nil))
       n)))
 
-(defun filtered-buffer-list ()
+(defun shortcuts-filtered-buffer-list ()
   (cons nil (seq-remove (lambda (e)
 		(or (string-prefix-p " " (buffer-name e))
 		    (string= (buffer-name e) "*shortcuts*")
@@ -49,33 +53,33 @@
 		    (string= (buffer-local-value 'major-mode e) "dired-mode")))
 	      (buffer-list))))
 
-(defun switch-to-shortcut (n)
-  (switch-to-buffer (elt (filtered-buffer-list) n)))
+(defun shortcuts-switch-to (n)
+  (switch-to-buffer (elt (shortcuts-filtered-buffer-list) n)))
 
-(defun goto-shortcut (@click)
+(defun shortcuts-goto (@click)
   (interactive "e")
   (let ((shortcut nil))
     (with-current-buffer "*shortcuts*"
       (setq shortcut (get-text-property (posn-point (event-start @click)) 'shortcut-target)))
-    (switch-to-shortcut shortcut)))
+    (shortcuts-switch-to shortcut)))
 
-(defun close-shortcut (@click)
+(defun shortcuts-close (@click)
   (interactive "e")
   (let ((shortcut nil))
     (with-current-buffer "*shortcuts*"
       (setq shortcut (get-text-property (posn-point (event-start @click)) 'shortcut-target)))
-    (kill-buffer (elt (filtered-buffer-list) shortcut))))
+    (kill-buffer (elt (shortcuts-filtered-buffer-list) shortcut))))
 
-(defun insert-shortcut (b num shortcuts-width cols)
+(defun shortcuts-insert (b num shortcuts-width cols)
   (let* ((md (buffer-local-value 'major-mode (elt b num)))
 	 (width (/ shortcuts-width cols))
 	 (avail (- width 6))
 	 (modewidth (- (/ avail 3) 2))
 	 (modename (substring (format "%s" md) 0 -5))
 	 (mdstr (if (> (+ (length (buffer-name (elt b num))) (length modename)) avail)
-		    (concat "(" (shrink-string modewidth modename) ")")
+		    (concat "(" (shortcuts-shrink-string modewidth modename) ")")
 		  (format "(%s)" modename)))
-	 (bufstr (shrink-string (- avail (length mdstr)) (buffer-name (elt b num))))
+	 (bufstr (shortcuts-shrink-string (- avail (length mdstr)) (buffer-name (elt b num))))
 	 (txt (format "C-%d %s%s%s "
 		      (% num 10)
 		      bufstr
@@ -83,8 +87,8 @@
 		      mdstr))
 	 (k (make-sparse-keymap))
 	 (bufwin (get-buffer-window (elt b num))))
-    (define-key k [mouse-1] 'goto-shortcut)
-    (define-key k [mouse-2] 'close-shortcut)
+    (define-key k [mouse-1] 'shortcuts-goto)
+    (define-key k [mouse-2] 'shortcuts-close)
     (put-text-property 0 (1- (length txt)) 'keymap k txt)
     (put-text-property 0 (1- (length txt)) 'mouse-face 'highlight txt)
     (put-text-property 0 (1- (length txt)) 'shortcut-target num txt)
@@ -92,11 +96,11 @@
 	(put-text-property 0 (1- (length txt)) 'face 'bold txt))
     (insert txt)))
 
-(defun update-shortcuts ()
+(defun shortcuts-update ()
   (let ((win (get-buffer-window "*shortcuts*")))
     (if win
 	(let* ((shortcuts-buf (get-buffer-create "*shortcuts*"))
-	       (b (filtered-buffer-list))
+	       (b (shortcuts-filtered-buffer-list))
 	       (num 0)
 	       (shortcuts-width (window-body-width win))
 	       (cols (min (/ shortcuts-width 25) 5)))
@@ -106,69 +110,85 @@
 	    (erase-buffer)
 	    (setq num 1)
 	    (while (and (< num (length b)) (<= num (* cols 2)))
-	      (insert-shortcut b num shortcuts-width cols)
+	      (shortcuts-insert b num shortcuts-width cols)
 	      (setq num (+ num 2)))
 	    (insert ?\n)
 	    (setq num 2)
 	    (while (and (< num (length b)) (<= num (* cols 2)))
-	      (insert-shortcut b num shortcuts-width cols)
+	      (shortcuts-insert b num shortcuts-width cols)
 	      (setq num (+ num 2)))
 	    (goto-char 0)
 	    (setq buffer-read-only t))
 	  (with-selected-window win
 	    (shrink-window-if-larger-than-buffer))))))
 
-(defun do-shortcut-1 ()
+(defun shortcuts-switch-to-1 ()
   (interactive)
-  (switch-to-shortcut 1))
-(defun do-shortcut-2 ()
+  (shortcuts-switch-to 1))
+(defun shortcuts-switch-to-2 ()
   (interactive)
-  (switch-to-shortcut 2))
-(defun do-shortcut-3 ()
+  (shortcuts-switch-to 2))
+(defun shortcuts-switch-to-3 ()
   (interactive)
-  (switch-to-shortcut 3))
-(defun do-shortcut-4 ()
+  (shortcuts-switch-to 3))
+(defun shortcuts-switch-to-4 ()
   (interactive)
-  (switch-to-shortcut 4))
-(defun do-shortcut-5 ()
+  (shortcuts-switch-to 4))
+(defun shortcuts-switch-to-5 ()
   (interactive)
-  (switch-to-shortcut 5))
-(defun do-shortcut-6 ()
+  (shortcuts-switch-to 5))
+(defun shortcuts-switch-to-6 ()
   (interactive)
-  (switch-to-shortcut 6))
-(defun do-shortcut-7 ()
+  (shortcuts-switch-to 6))
+(defun shortcuts-switch-to-7 ()
   (interactive)
-  (switch-to-shortcut 7))
-(defun do-shortcut-8 ()
+  (shortcuts-switch-to 7))
+(defun shortcuts-switch-to-8 ()
   (interactive)
-  (switch-to-shortcut 8))
-(defun do-shortcut-9 ()
+  (shortcuts-switch-to 8))
+(defun shortcuts-switch-to-9 ()
   (interactive)
-  (switch-to-shortcut 9))
-(defun do-shortcut-0 ()
+  (shortcuts-switch-to 9))
+(defun shortcuts-switch-to-0 ()
   (interactive)
-  (switch-to-shortcut 10))
+  (shortcuts-switch-to 10))
 
-(defun shortcuts-mode ()
-  (interactive)
-  (let ((n (display-buffer-in-side-window (get-buffer-create "*shortcuts*") (list '(side . top)))))
-    (set-window-dedicated-p n t)
-    (set-window-parameter n 'no-other-window t)
-    (with-selected-window n
-       (make-local-variable 'window-size-fixed)
-       (make-local-variable 'mode-line-format)
-       (setq mode-line-format (list ""))))
-  (add-hook 'buffer-list-update-hook 'update-shortcuts)
-  (add-hook 'window-configuration-change-hook 'update-shortcuts)
-  (global-set-key [?\C-1] 'do-shortcut-1)
-  (global-set-key [?\C-2] 'do-shortcut-2)
-  (global-set-key [?\C-3] 'do-shortcut-3)
-  (global-set-key [?\C-4] 'do-shortcut-4)
-  (global-set-key [?\C-5] 'do-shortcut-5)
-  (global-set-key [?\C-6] 'do-shortcut-6)
-  (global-set-key [?\C-7] 'do-shortcut-7)
-  (global-set-key [?\C-8] 'do-shortcut-8)
-  (global-set-key [?\C-9] 'do-shortcut-9)
-  (global-set-key [?\C-0] 'do-shortcut-0))
+(define-minor-mode shortcuts-mode
+  "Toggle shortcuts-mode.
+This is a minor mode which adds a sticky window to the top of the
+frame listing the last ten buffers that were accessed.  You can
+then instantly switch the current window to one of the recent
+ buffers using C-1 through C-0."
+  :global t
+  :init-value nil
+  :lighter nil
+  :keymap '(([?\C-1] . shortcuts-switch-to-1)
+	    ([?\C-2] . shortcuts-switch-to-2)
+	    ([?\C-3] . shortcuts-switch-to-3)
+	    ([?\C-4] . shortcuts-switch-to-4)
+	    ([?\C-5] . shortcuts-switch-to-5)
+	    ([?\C-6] . shortcuts-switch-to-6)
+	    ([?\C-7] . shortcuts-switch-to-7)
+	    ([?\C-8] . shortcuts-switch-to-8)
+	    ([?\C-9] . shortcuts-switch-to-9)
+	    ([?\C-0] . shortcuts-switch-to-0))
+
+  (if shortcuts-mode
+      (let ((n (display-buffer-in-side-window (get-buffer-create "*shortcuts*") (list '(side . top)))))
+	(set-window-dedicated-p n t)
+	(set-window-parameter n 'no-other-window t)
+	(with-selected-window n
+	  (make-local-variable 'window-size-fixed)
+	  (make-local-variable 'mode-line-format)
+	  (setq mode-line-format (list "")))
+	(add-hook 'buffer-list-update-hook #'shortcuts-update)
+	(add-hook 'window-configuration-change-hook #'shortcuts-update))
+    (progn
+      (kill-buffer "*shortcuts*")
+      (remove-hook 'buffer-list-update-hook #'shortcuts-update)
+      (remove-hook 'window-configuration-change-hook #'shortcuts-update)))
+  )
 
 (provide 'shortcuts-mode)
+
+;;; shortcuts-mode.el ends here
