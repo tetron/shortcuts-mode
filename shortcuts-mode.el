@@ -28,6 +28,10 @@
 ;; then instantly switch the current window to one of the recent
 ;; buffers using C-1 through C-0.
 ;;
+;; The shortcut bar also supports basic mouse navigation.  Left click
+;; switches the current window to the selected buffer, and middle
+;; click kills the selected buffer.
+;;
 ;; As a special case, certain utility buffers (*Buffer List*,
 ;; *Ibuffer*, the *shortcuts* buffer itself) are excluded from the top
 ;; bar.  Dired buffers are also filtered, because otherwise navigating
@@ -35,8 +39,6 @@
 ;; directory) tends to fill up all the top slots.
 
 ;;; Code:
-
-
 
 (defun shortcuts-shrink-string (p n)
   (let ((p2 (* 2 (/ p 2))))
