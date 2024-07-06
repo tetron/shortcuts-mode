@@ -1,4 +1,4 @@
-;;; shortcuts-mode.el --- minor mode providing a buffer shortcut bar    -*- lexical-binding: t; -*-
+;;; shortcuts-mode.el --- Minor mode providing a buffer shortcut bar    -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024  Peter Amstutz
 
@@ -153,6 +153,7 @@
   (interactive)
   (shortcuts-switch-to 10))
 
+;;;###autoload
 (define-minor-mode shortcuts-mode
   "Toggle shortcuts-mode.
 This is a minor mode which adds a sticky window to the top of the
@@ -186,8 +187,7 @@ then instantly switch the current window to one of the recent
     (progn
       (kill-buffer "*shortcuts*")
       (remove-hook 'buffer-list-update-hook #'shortcuts-update)
-      (remove-hook 'window-configuration-change-hook #'shortcuts-update)))
-  )
+      (remove-hook 'window-configuration-change-hook #'shortcuts-update))))
 
 (provide 'shortcuts-mode)
 
