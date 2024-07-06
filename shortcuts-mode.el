@@ -26,7 +26,8 @@
 ;; This is a minor mode which adds a sticky window to the top of the
 ;; frame listing the last ten buffers that were accessed.  You can
 ;; then instantly switch the current window to one of the recent
-;; buffers using C-1 through C-0.
+;; buffers using C-1 through C-0.  Think of it as an extremely
+;; lightweight tab bar oriented around keyboard navigation.
 ;;
 ;; The shortcut bar also supports basic mouse navigation.  Left click
 ;; switches the current window to the selected buffer, and middle
@@ -35,18 +36,21 @@
 ;; As a special case, certain utility buffers (*Buffer List*,
 ;; *Ibuffer*, the *shortcuts* buffer itself) are excluded from the top
 ;; bar.  Dired buffers are also filtered, because otherwise navigating
-;; the filesystem through dired (which creates a new buffer for each
+;; the filesystem through Dired (which creates a new buffer for each
 ;; directory) tends to fill up all the top slots.
 
 ;;; Code:
 
 (defun shortcuts-shrink-string (p n)
+  "Shrink string P to be at most N characters in length.
+Removes the middle of the string if necessary and replaces with ellipses."
   (let ((p2 (* 2 (/ p 2))))
     (if (> (length n) (1+ p2))
 	(concat (substring n 0 (/ p 2)) "…" (substring n (/ p -2) nil))
       n)))
 
 (defun shortcuts-filtered-buffer-list ()
+  "Remove utility and Dired buffers from the list of buffers to be displayed in the shortcuts bar."
   (cons nil (seq-remove (lambda (e)
 		(or (string-prefix-p " " (buffer-name e))
 		    (string= (buffer-name e) "*shortcuts*")
@@ -56,9 +60,11 @@
 	      (buffer-list))))
 
 (defun shortcuts-switch-to (n)
+  "Switch current window to buffer N in the shortcuts bar."
   (switch-to-buffer (elt (shortcuts-filtered-buffer-list) n)))
 
 (defun shortcuts-goto (@click)
+  "Process mouse event @CLICK to switch current window to the selected buffer."
   (interactive "e")
   (let ((shortcut nil))
     (with-current-buffer "*shortcuts*"
@@ -66,6 +72,7 @@
     (shortcuts-switch-to shortcut)))
 
 (defun shortcuts-close (@click)
+  "Process mouse event @CLICK to kill the selected buffer."
   (interactive "e")
   (let ((shortcut nil))
     (with-current-buffer "*shortcuts*"
@@ -73,6 +80,8 @@
     (kill-buffer (elt (shortcuts-filtered-buffer-list) shortcut))))
 
 (defun shortcuts-insert (b num shortcuts-width cols)
+  "Render a single shortcut on the bar for buffer B in shortcut position NUM.
+SHORTCUTS-WIDTH is the width of the window and COLS in the number of columns."
   (let* ((md (buffer-local-value 'major-mode (elt b num)))
 	 (width (/ shortcuts-width cols))
 	 (avail (- width 6))
@@ -99,6 +108,7 @@
     (insert txt)))
 
 (defun shortcuts-update ()
+  "Update the shortcuts buffer when something changed.  Executed as a hook."
   (let ((win (get-buffer-window "*shortcuts*")))
     (if win
 	(let* ((shortcuts-buf (get-buffer-create "*shortcuts*"))
@@ -125,39 +135,49 @@
 	    (shrink-window-if-larger-than-buffer))))))
 
 (defun shortcuts-switch-to-1 ()
+  "Switch to buffer in shortcut position 1."
   (interactive)
   (shortcuts-switch-to 1))
 (defun shortcuts-switch-to-2 ()
+  "Switch to buffer in shortcut position 2."
   (interactive)
   (shortcuts-switch-to 2))
 (defun shortcuts-switch-to-3 ()
+  "Switch to buffer in shortcut position 3."
   (interactive)
   (shortcuts-switch-to 3))
 (defun shortcuts-switch-to-4 ()
+  "Switch to buffer in shortcut position 4."
   (interactive)
   (shortcuts-switch-to 4))
 (defun shortcuts-switch-to-5 ()
+  "Switch to buffer in shortcut position 5."
   (interactive)
   (shortcuts-switch-to 5))
 (defun shortcuts-switch-to-6 ()
+  "Switch to buffer in shortcut position 6."
   (interactive)
   (shortcuts-switch-to 6))
 (defun shortcuts-switch-to-7 ()
+  "Switch to buffer in shortcut position 7."
   (interactive)
   (shortcuts-switch-to 7))
 (defun shortcuts-switch-to-8 ()
+  "Switch to buffer in shortcut position 8."
   (interactive)
   (shortcuts-switch-to 8))
 (defun shortcuts-switch-to-9 ()
+  "Switch to buffer in shortcut position 9."
   (interactive)
   (shortcuts-switch-to 9))
 (defun shortcuts-switch-to-0 ()
+  "Switch to buffer in shortcut position 10."
   (interactive)
   (shortcuts-switch-to 10))
 
 ;;;###autoload
 (define-minor-mode shortcuts-mode
-  "Toggle shortcuts-mode.
+  "Toggle 'shortcuts-mode'.
 This is a minor mode which adds a sticky window to the top of the
 frame listing the last ten buffers that were accessed.  You can
 then instantly switch the current window to one of the recent
