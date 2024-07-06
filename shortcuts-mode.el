@@ -41,6 +41,25 @@
 
 ;;; Code:
 
+;; The following "sticky" function was borrowed from the
+;; Emacs wiki:
+;;
+;; https://www.emacswiki.org/emacs/sticky-windows.el
+;;
+;; This is required so that "C-x 1" doesn't cause the shortcut window
+;; to go away.
+;;
+;; Code posted to the wiki is GPL 2
+
+;;;###autoload
+(defun shortcuts-sticky-window-delete-other-windows ()
+  "Delete all other windows that are not marked to be visible with `window-dedicated-p`."
+  (interactive)
+  (mapcar (lambda (window)
+			(if (not (window-dedicated-p window))
+				(delete-window window)))
+		  (cdr (window-list))))
+
 (defun shortcuts-shrink-string (p n)
   "Shrink string P to be at most N characters in length.
 Removes the middle of the string if necessary and replaces with ellipses."
@@ -194,7 +213,8 @@ then instantly switch the current window to one of the recent
 	    ([?\C-7] . shortcuts-switch-to-7)
 	    ([?\C-8] . shortcuts-switch-to-8)
 	    ([?\C-9] . shortcuts-switch-to-9)
-	    ([?\C-0] . shortcuts-switch-to-0))
+	    ([?\C-0] . shortcuts-switch-to-0)
+	    ([(control ?x) ?1] . shortcuts-sticky-window-delete-other-windows))
   :group 'convenience
 
   (if shortcuts-mode
