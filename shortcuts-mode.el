@@ -196,7 +196,7 @@ SHORTCUTS-WIDTH is the width of the window and COLS in the number of columns."
 
 ;;;###autoload
 (define-minor-mode shortcuts-mode
-  "Toggle 'shortcuts-mode'.
+  "Toggle `shortcuts-mode`.
 This is a minor mode which adds a sticky window to the top of the
 frame listing the last ten buffers that were accessed.  You can
 then instantly switch the current window to one of the recent
